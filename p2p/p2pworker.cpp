@@ -2,9 +2,7 @@
 
 P2pWorker::P2pWorker(QObject *parent) : QObject(parent)
 {
-
     sessionHandle = -1;
-
 
     isFindHead = false;
     isFindCmd = false;
@@ -17,14 +15,10 @@ P2pWorker::P2pWorker(QObject *parent) : QObject(parent)
     readDataBuff.clear();
     needLen = 2;
 
-
     m_serverKey = nullptr;
-
 
     m_validDatalen = 0;
     m_cmd = 0;
-
-
 }
 
 
@@ -80,7 +74,6 @@ void P2pWorker::slot_connectDev(QString deviceDid,QString name,QString pwd)
     sessionHandle = PPCS_Connect(deviceDid.toLatin1().data(),1,0);
 
     qDebug()<<"P2P connectDev   ret ="<<sessionHandle;
-
     if(sessionHandle >= 0){
 
         isWorking = true;
@@ -97,6 +90,12 @@ void P2pWorker::slot_connectDev(QString deviceDid,QString name,QString pwd)
         emit slot_startLoopRead();
     }else{
         QThread::msleep(500);
+
+
+        if(sessionHandle == ERROR_PPCS_DEVICE_NOT_ONLINE){
+            //qDebug()<<"signal_sendMsg";
+            emit signal_sendMsg(new MsgInfo("device is not online",true));
+        }
         slot_connectDev(m_did,"admin","admin");
     }
 
@@ -118,6 +117,10 @@ void P2pWorker::slot_startLoopRead()
 
                 if(ERROR_PPCS_SESSION_CLOSED_TIMEOUT == ret){
                     qDebug()<<"长时间未收到数据，将断开";
+
+
+                    emit signal_sendMsg(new MsgInfo("device is disconnect, try to reconnect",true));
+
                     isWorking = false;
                     break;
                 }

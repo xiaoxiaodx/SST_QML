@@ -16,13 +16,10 @@ Rectangle {
     signal st_showToastMsg(string str1);
     signal s_multiScreenNumChange(int num);
 
-
     property int multiScreenNum: 2
     property int premultiScreenNum: 2
 
     property int modelDataCurrentIndex: 0
-
-
 
     property int preMaxIndex: 0//最大化前，该视频对应的索引位置，0表示第一个
     property int preMaxmultiScreenNum: 2//最大化之前，该流对应的索引位置，0表示第一个
@@ -248,110 +245,127 @@ Rectangle {
         }
 
 
-        SwipeView {
+        Rectangle {
             id: view
             height: parent.height - rectBar.height-2
             width: parent.width;
             anchors.top: rectBar.bottom
             anchors.topMargin: 2
-            anchors.left: parent.left
+          //  currentIndex: 1
             z:0
 
 
+//            header: TabBar {
+//                         id: headertabBar;
+//                         currentIndex:swipeView.currentIndex
+//                         TabButton {
 
-                Rectangle{
-                    id:rect
-                     // color: "blue"
-                    color: "#00000000"
-
-                    width: parent.width
-                    height: parent.height
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    GridView{
-                        id: touchPad
-                        z:1
-
-                        anchors.fill: parent
-                        cacheBuffer: 0
-
-                        objectName: "listDeviceDataModel"
-                        model: listDeviceDataModel //objectlist model
-                        cellWidth: (parent.width )/multiScreenNum
-                        cellHeight:(parent.height )/multiScreenNum
-//                        move: Transition {
-
-//                            NumberAnimation { properties: "x,y"; duration: 500 }
-//                        }
-
-                        //                    moveDisplaced: Transition {
-
-                        //                                            NumberAnimation { properties: "x,y"; from: 0; duration: 300 }
-                        //                                        }
-
-                        onXChanged: {
-
-                            console.debug("GridView onXChanged " + x);
-                        }
-                        delegate:
-                            VideoLivePlay{
-                            id:video
-                            z:3
-                            width: touchPad.cellWidth
-                            height: touchPad.cellHeight
+//                             text: qsTr("header one");
+//                         }
+//                         TabButton {
+//                             text: qsTr("header two")
+//                         }
+//                         TabButton {
+//                             text: qsTr("header three")
+//                         }
+//                         TabButton {
+//                             text: qsTr("header four")
+//                         }
+//                     }
 
 
-                            color: "black"
 
-                            mip:ip
-                            mport:port
-                            mID:did
-                            mAcc:account
-                            mPwd:password
-                            mIsPlayAudio:(index===0 && multiScreenNum===1)?true:false
-                            mIsCreateConenect:isCreateConnected>0?true:false
+            Rectangle{
+                id:rect
+                 //color: "blue"
+                color: "#00000000"
 
-                            mIsSelected: index === modelDataCurrentIndex
+                width: parent.width
+                height: parent.height
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
 
-                            onClick:  modelDataCurrentIndex = index
+                GridView{
+                    id: touchPad
+                    z:1
 
-                            onDoubleClick: {
+                    anchors.fill: parent
+                    cacheBuffer: 0
 
+                    objectName: "listDeviceDataModel"
+                    model: listDeviceDataModel //objectlist model
+                    cellWidth: (parent.width )/multiScreenNum
+                    cellHeight:(parent.height )/multiScreenNum
+                    //                        move: Transition {
 
-                                console.debug("onDoubleClick    "+multiScreenNum)
-                                if(multiScreenNum != 1)
-                                    multiScreenNum = 1;
-                                else
-                                    multiScreenNum = preMaxmultiScreenNum
+                    //                            NumberAnimation { properties: "x,y"; duration: 500 }
+                    //                        }
 
+                    //                    moveDisplaced: Transition {
 
-                            }
+                    //                                            NumberAnimation { properties: "x,y"; from: 0; duration: 300 }
+                    //                                        }
 
-                            onS_showToastMsg:st_showToastMsg(str)
+                    onXChanged: {
 
-                            onS_deleteObject:deleteDevice(index)
-                        }
-
+                        console.debug("GridView onXChanged " + x);
                     }
+                    delegate:
+                        VideoLivePlay{
+                        id:video
+                        z:3
+                        width: touchPad.cellWidth
+                        height: touchPad.cellHeight
 
-                    MouseArea{
-                        id:mouse
-                        anchors.fill: parent
+                        color: "black"
+                        mip:ip
+                        mport:port
+                        mID:did
+                        mAcc:account
+                        mPwd:password
+                        mIsPlayAudio:(index===0 && multiScreenNum===1)?true:false
+                        mIsCreateConenect:isCreateConnected>0?true:false
 
-                        propagateComposedEvents: true
+                        mIsSelected: index === modelDataCurrentIndex
 
-                        enabled: true
+                        onClick:  modelDataCurrentIndex = index
 
-                        onWheel: {
+                        onDoubleClick: {
+
+
+                            console.debug("onDoubleClick    "+multiScreenNum)
+                            if(multiScreenNum != 1)
+                                multiScreenNum = 1;
+                            else
+                                multiScreenNum = preMaxmultiScreenNum
+
+
                         }
 
-                        z:2
-                    }
+                        onS_showToastMsg:st_showToastMsg(str)
 
+                        onS_deleteObject:deleteDevice(index)
+                    }
 
                 }
+
+                MouseArea{
+                    id:mouse
+                    anchors.fill: parent
+
+                    propagateComposedEvents: true
+
+                    enabled: true
+
+                    onWheel: {
+                    }
+
+                    z:2
+                }
+
+
             }
+        }
     }
 
 

@@ -127,6 +127,7 @@ private:
     bool isStartRecord;//是否启动录像
     bool isScreenShot;
     bool isAudioFirstPlay;
+    bool isFirstData;
 
     quint64 preAudioTime;
 

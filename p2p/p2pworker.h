@@ -6,6 +6,7 @@
 #include <QThread>
 #include <QTimer>
 
+#include "dispatchmsgmanager.h"
 extern "C"{
 #include "PPCS_API.h"
 #include "PPCS_Error.h"
@@ -48,6 +49,7 @@ signals:
     void signal_sendPcmALaw(char* PcmALawArr,int arrLen,long long pts);
 
     void signal_loopEnd();
+    void signal_sendMsg(MsgInfo *info);
 
 public slots:
 

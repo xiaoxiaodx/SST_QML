@@ -41,6 +41,7 @@ ApplicationWindow {
 
     onVisibilityChanged: {
 
+        console.debug(" HomeContent:"+mhomecontent.x  + "   "+ mhomecontent.y)
         if(isSpecilState){
             if(main.visibility === 2){
                 main.visibility = "Maximized"
@@ -80,12 +81,12 @@ ApplicationWindow {
             onWinClose:Qt.quit();
             onDragPosChange:setDlgPoint(mx,my);
 
-
         }
 
         HomeContent{
             id:mhomecontent
             anchors.top: mTitleBar.bottom
+            anchors.left: parent.left
             width: parent.width
             height: parent.height - mTitleBar.height - mhomeState.height-2
             z:1

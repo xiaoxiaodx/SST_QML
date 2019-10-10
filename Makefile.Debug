@@ -1441,6 +1441,25 @@ debug/moc_p2pworker.cpp: p2p/p2pworker.h \
 		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/QTimer \
 		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qtimer.h \
 		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qbasictimer.h \
+		dispatchmsgmanager.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/QList \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qevent.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qtguiglobal.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qtgui-config.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qwindowdefs.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qwindowdefs_win.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qregion.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qrect.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qmargins.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qsize.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qdatastream.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qkeysequence.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qurl.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qurlquery.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qfile.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qfiledevice.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qvector2d.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qtouchdevice.h \
 		third/p2p_ppcs/include/PPCS_API.h \
 		third/p2p_ppcs/include/PPCS_Type.h \
 		third/p2p_ppcs/include/PPCS_Error.h \
@@ -3114,6 +3133,25 @@ debug/p2pworker.o: p2p/p2pworker.cpp P2P/p2pworker.h \
 		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/QTimer \
 		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qtimer.h \
 		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qbasictimer.h \
+		dispatchmsgmanager.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/QList \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qevent.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qtguiglobal.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qtgui-config.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qwindowdefs.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qwindowdefs_win.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qregion.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qrect.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qmargins.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qsize.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qdatastream.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qkeysequence.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qurl.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qurlquery.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qfile.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtCore/qfiledevice.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qvector2d.h \
+		D:/Qt/Qt5.12.2/5.12.2/mingw73_32/include/QtGui/qtouchdevice.h \
 		third/p2p_ppcs/include/PPCS_API.h \
 		third/p2p_ppcs/include/PPCS_Type.h \
 		third/p2p_ppcs/include/PPCS_Error.h \

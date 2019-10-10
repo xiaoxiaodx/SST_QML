@@ -10,8 +10,8 @@ XVideo::XVideo()
 
     initVariable();
 
-    createP2pThread();
-    //createTcpThread();
+    //createP2pThread();
+    createTcpThread();
     //creatDateProcessThread();
     //createPlayAudio();
     // createAviRecord();
@@ -21,7 +21,6 @@ XVideo::XVideo()
 
     //消息分发定时器
     connect(mpDispatchMsgManager,&DispatchMsgManager::signal_sendToastMsg,this,&XVideo::slot_sendToastMsg);
-
 }
 
 
@@ -54,6 +53,8 @@ void XVideo::initVariable()
     isPlayAudio = false;
     isRecordAvi =false;
     isScreenShot = false;
+    isFirstData = false;
+
     isAudioFirstPlay = true;
 
 
@@ -112,6 +113,7 @@ void XVideo::createP2pThread()
         connect(p2pWorker,&P2pWorker::signal_sendH264,this,&XVideo::slot_recH264,Qt::DirectConnection);
         connect(p2pWorker,&P2pWorker::signal_sendPcmALaw,this,&XVideo::slot_recPcmALaw,Qt::DirectConnection);
 
+        connect(p2pWorker,&P2pWorker::signal_sendMsg,this,&XVideo::slot_recMsg);
         connect(p2pWorker,&P2pWorker::signal_loopEnd,this,&XVideo::slot_reconnectP2p);
         connect(this,&XVideo::signal_tcpSendAuthentication,p2pWorker,&P2pWorker::slot_connectDev);
 
@@ -248,6 +250,14 @@ void XVideo::slot_timeout()
     int size = listImgInfo.size();
 
     if(size >= 3){
+
+
+        //如果不增加这句代码 ，则会出现视频不会第一时间显示，而是显示灰色图像
+        if(!isFirstData){
+            emit signal_loginStatus("Get the stream successfully");
+            isFirstData = true;
+        }
+
         update();
     }
 
@@ -438,6 +448,8 @@ void XVideo::slot_recPcmALaw( char * buff,int len,quint64 time)
 
 void XVideo::slot_recMsg(MsgInfo * msg)
 {
+
+    qDebug()<<"slot_recMsg  "<<msg->msgContentStr;
 
     if(mpDispatchMsgManager != nullptr)
         mpDispatchMsgManager->addMsg(msg);

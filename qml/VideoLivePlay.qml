@@ -14,7 +14,7 @@ Rectangle {
     property string mAcc: ""
     property string mPwd: ""
     property bool mIsCreateConenect: false
-    property bool mIsPlayAudio: true
+    property bool mIsPlayAudio: false
     property bool mIsSelected: false
     property bool mIsRecordVedio: false
 
@@ -27,16 +27,16 @@ Rectangle {
 
 
 
-        Component{
-            id:nullComponent
-            Rectangle{
+    Component{
+        id:nullComponent
+        Rectangle{
 
-                anchors.fill: parent
-                color: "#00000000"
-                border.color: "white"
-                border.width: 2
-            }
+            anchors.fill: parent
+            color: "#00000000"
+            border.color: "white"
+            border.width: 2
         }
+    }
 
 
     Component{
@@ -45,22 +45,23 @@ Rectangle {
         Rectangle{
             anchors.fill: parent
             //color: "#00000000"
-
             border.color: mIsSelected?"red":"#00000000"
-
             border.width: 2
 
             XVideo{
                 id:video
                 anchors.fill: parent
+
                 property bool mXVideoPlayAudio: mIsPlayAudio
-                property bool mXVideoRecordVedio: mIsRecordVedio
+                //property bool mXVideoRecordVedio: mIsRecordVedio
 
                 anchors.margins: 2
 
                 Component.onCompleted:{
                     sendAuthentication(mID,mAcc,mPwd);
                     connectServer(mip,mport)
+
+
                 }
 
                 onMXVideoPlayAudioChanged:
@@ -70,18 +71,6 @@ Rectangle {
                     if(mIsCreateConenect)
                         funPlayAudio(mXVideoPlayAudio)
                 }
-
-                onMXVideoRecordVedioChanged: {
-
-                    funRecordVedio(mIsRecordVedio);
-
-                    if(mIsRecordVedio){
-                        s_showToastMsg("开始录像")
-                    }else{
-                        s_showToastMsg("结束录像");
-                    }
-                }
-
 
 
                 onSignal_loginStatus: {
@@ -102,8 +91,6 @@ Rectangle {
                 }
 
 
-
-
                 MouseArea{
                     anchors.fill: parent
                     hoverEnabled: true
@@ -113,7 +100,7 @@ Rectangle {
                     onClicked: {
 
 
-                    //    mouse.accepted = false
+                        //    mouse.accepted = false
                         click();
                     }
                     onEntered: {
@@ -161,19 +148,15 @@ Rectangle {
                     }
                 }
 
-
                 Rectangle{
                     id:rectRecord
                     anchors.bottom:parent.bottom
                     anchors.bottomMargin: 4
                     anchors.horizontalCenter: parent.horizontalCenter
-
                     height: 50
                     width: parent.width-8
-                    color: "#55888888"
+                    color: "#55888888"     
                     opacity: 0
-
-
 
                     MouseArea{
                         anchors.fill: parent
@@ -187,7 +170,6 @@ Rectangle {
                                 rectRecord.state = "show"
 
                             }
-
                         }
                         onExited: {
                             if(mIsSelected){
@@ -214,7 +196,7 @@ Rectangle {
                         PropertyAnimation  {properties: "opacity"; duration: 600; easing.type: Easing.Linear  }
                     }
 
-                    QmlImageButton{
+                    BorderImage{
 
                         id:btnstop
 
@@ -223,65 +205,57 @@ Rectangle {
                         anchors.left: parent.left
                         anchors.leftMargin: 30
                         anchors.verticalCenter: parent.verticalCenter
-                        imgSourseNormal: "qrc:/images/stop.png"
-                        imgSourseHover: "qrc:/images/stop.png"
-                        imgSoursePress: "qrc:/images/stop.png"
+                        source: "qrc:/images/stop.png"
+
                     }
 
-                    Image{
 
+
+                    BorderImage{
                         id:btnRecordVideo
-
-                        enabled: true
                         width: 34
                         height: 34
                         anchors.left: btnstop.right
                         anchors.leftMargin: 10
                         anchors.verticalCenter: parent.verticalCenter
 
-                        source: "qrc:/images/recordVideo_start.png"
+                        source: mIsRecordVedio?"qrc:/images/recordVideo_ing.png":"qrc:/images/recordVideo_start.png"
 
                         MouseArea{
                             anchors.fill: parent
 
                             enabled: true
                             onClicked: {
-                                                    console.debug("onClick   ")
 
-                                if(!mIsRecordVedio){
-                                    mIsRecordVedio = true;
-
-                                    btnRecordVideo.source = "qrc:/images/recordVideo_ing.png"
-
-
-                                }else{
-                                    mIsRecordVedio = false;
-
-                                     btnRecordVideo.source = "qrc:/images/recordVideo_start.png"
-                                }
-
+                              delayFun(500,recordBtnClickFun);
 
                             }
                         }
                     }
 
-                    QmlImageButton{
-
+                    BorderImage{
                         id:btnScreenShot
-
 
                         width: 34
                         height: 34
                         anchors.left: btnRecordVideo.right
                         anchors.leftMargin: 10
                         anchors.verticalCenter: parent.verticalCenter
-                        imgSourseNormal: "qrc:/images/screenshot.png"
-                        imgSourseHover: "qrc:/images/screenshot.png"
-                        imgSoursePress: "qrc:/images/screenshot.png"
+                        source: "qrc:/images/screenshot.png"
+
+                        MouseArea{
+                            anchors.fill: parent
+
+                            enabled: true
+                            onClicked: {
+
+                              delayFun(100,screenShotBtnClick);
+
+                            }
+                        }
                     }
 
                 }
-
 
                 Component {
                     id: cpt_busyWait
@@ -294,9 +268,78 @@ Rectangle {
                 }
             }
 
-        }
+            Rectangle{
+                id:screenShotMask
+                anchors.fill: parent
+                color: "white"
+                opacity: 0
 
+                SequentialAnimation {
+
+                    id:animationOpacity
+                    NumberAnimation { target: screenShotMask; property: "opacity"; to: 0.5; duration: 100 }
+                    NumberAnimation { target: screenShotMask; property: "opacity"; to: 0; duration: 100 }
+                }
+                function startAnimation(){
+                    animationOpacity.start();
+                }
+
+            }
+
+            Timer{
+                id:delayTimer
+
+                triggeredOnStart:false
+
+                repeat:false
+
+                function setTimeOut(delayTime,fun){
+                    timer.interval = delayTime;
+                    timer.repeat = false;
+                    timer.triggered.connect(fun);
+                    timer.triggered.connect(function release(){
+                        timer.triggered.disconnect(fun);
+                        timer.triggered.disconnect(release);
+                    })
+                    timer.start();
+                }
+            }
+
+            function delayFun(delay,fun1){
+
+
+               delayTimer.setTimeOut(delay,fun1)
+
+            }
+
+
+            function recordBtnClickFun(){
+
+
+                console.debug("recordBtnClickFun        ----"+mIsRecordVedio)
+                if(!mIsRecordVedio){
+
+                    s_showToastMsg("开始录像");
+                    mIsRecordVedio = true;
+
+                }else{
+                     s_showToastMsg("结束录像");
+                    mIsRecordVedio = false;
+
+                }
+
+                video.funRecordVedio(mIsRecordVedio);
+            }
+
+            function screenShotBtnClick(){
+
+                screenShotMask.startAnimation();
+                video.funScreenShot();
+            }
+
+        }
     }
+
 
 
 
