@@ -1,0 +1,13 @@
+APP Version: APP_VERSION
+Windows:  6.1.7601, SP 1.0, Product Type 1
+GraphicsCard: SoundDevice: Process:  E:\SSTQMLTC\release\QmlVideo.exe
+Exception Addr:  5CEECE53   Module: E:\SSTQMLTC\release\avformat-58.dll
+Exception Code:  C0000005
+Read Address:  00000030
+Instruction:  8B 55 30 69 C1 A8 05 00 00 01 D0 89 44 24 1C 8B
+Registers: 
+EAX: 10E788C0  EBX: 10E788C0  ECX: 00000001  EDX: 00000000
+ESI: 00000001  EDI: 0E68DCB8  ESP: 0E68DB20  EBP: 00000000
+EIP: 5CEECE53  EFlags: 00010206
+Call Stack:
+5CEECE53  E:\SSTQMLTC\release\avformat-58.dll
