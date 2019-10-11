@@ -7,7 +7,7 @@ Rectangle {
 
 
     property bool isPress: false
-
+    property string versionStr: "V-0-0-0"
 
     signal winMin();
     signal winMax();
@@ -28,6 +28,18 @@ Rectangle {
             source: "qrc:/images/iEagleCam.png"
         }
 
+        Label{
+            anchors.top: namew.bottom
+            anchors.left: parent.left
+            anchors.leftMargin: 25+130/2
+
+            font.family: "arial"
+            font.pointSize: 10
+            color: "white"
+            font.italic:true
+            font.bold: true
+            text: versionStr
+        }
 
 
         MouseArea {

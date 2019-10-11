@@ -6,15 +6,17 @@ FfmpegCodec::FfmpegCodec(QObject *parent) : QObject(parent)
     initVariable();
     av_register_all();
 
-    audioSrc = new QFile("playAudioSrc.pcm");
-    if (!audioSrc->open(QIODevice::ReadOnly  |QIODevice::WriteOnly))
-        return;
+//    audioSrc = new QFile("playAudioSrc.pcm");
+//    if (!audioSrc->open(QIODevice::ReadOnly  |QIODevice::WriteOnly))
+//        return;
 
 }
 
 
 void FfmpegCodec::initVariable()
 {
+
+    audioSrc = nullptr;
     m_pVoutBuffer = nullptr;
     m_VstreamIndex = -1;
     m_AstreamIndex = -1;

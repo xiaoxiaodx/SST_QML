@@ -60,6 +60,7 @@ ApplicationWindow {
             width: parent.width
             height: 60
             color: "#3f8eff"
+            versionStr:"V-0-1-1"
             z:2
             onWinMin: {
 

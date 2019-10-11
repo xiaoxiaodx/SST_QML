@@ -44,11 +44,11 @@ Rectangle {
                 vedioWindowRestore(preMaxIndex,preMaxmultiScreenNum)
             }
 
-
         }
-
         premultiScreenNum = multiScreenNum;
 
+        for(var i= listDeviceDataModel.count ; i<=multiScreenNum*multiScreenNum;i++)
+            addDevice(0,"***"+i+1,"***","***","***","***");
     }
 
 
@@ -149,8 +149,6 @@ Rectangle {
             }
         }
 
-
-
         ListModel{
             id:listDeviceDid
 
@@ -168,7 +166,6 @@ Rectangle {
             model: listDeviceDid
 
             delegate: ListDeviceItem{
-
 
                 backColor: index === modelDataCurrentIndex?"#dedede":"#eeeeee"
                 mDeviceID: did
@@ -206,8 +203,6 @@ Rectangle {
                     }
 
                 }
-
-
             }
         }
     }
@@ -244,7 +239,6 @@ Rectangle {
             }
         }
 
-
         Rectangle {
             id: view
             height: parent.height - rectBar.height-2
@@ -253,28 +247,6 @@ Rectangle {
             anchors.topMargin: 2
           //  currentIndex: 1
             z:0
-
-
-//            header: TabBar {
-//                         id: headertabBar;
-//                         currentIndex:swipeView.currentIndex
-//                         TabButton {
-
-//                             text: qsTr("header one");
-//                         }
-//                         TabButton {
-//                             text: qsTr("header two")
-//                         }
-//                         TabButton {
-//                             text: qsTr("header three")
-//                         }
-//                         TabButton {
-//                             text: qsTr("header four")
-//                         }
-//                     }
-
-
-
             Rectangle{
                 id:rect
                  //color: "blue"
@@ -297,12 +269,9 @@ Rectangle {
                     cellWidth: (parent.width )/multiScreenNum
                     cellHeight:(parent.height )/multiScreenNum
                     //                        move: Transition {
-
                     //                            NumberAnimation { properties: "x,y"; duration: 500 }
                     //                        }
-
                     //                    moveDisplaced: Transition {
-
                     //                                            NumberAnimation { properties: "x,y"; from: 0; duration: 300 }
                     //                                        }
 
@@ -362,14 +331,9 @@ Rectangle {
 
                     z:2
                 }
-
-
             }
         }
     }
-
-
-
 
     ListModel{
         id:listDeviceDataModel
@@ -444,29 +408,22 @@ Rectangle {
     function vedioWindowMax(saveIndex,saveScreenNum){
 
         //console.debug("vedioWindowMax" + preMaxIndex +"  "+preMaxmultiScreenNum + "    "+ tmpIndex)
-
         preMaxmultiScreenNum = saveScreenNum
         preMaxIndex = saveIndex;
 
         listDeviceDataModel.move(saveIndex,0,1);
         modelDataCurrentIndex = 0;
-
-
     }
 
     function vedioWindowRestore(restoreIndex,restoreScreenNum){
 
         //console.debug("vedioWindowRestore   " + preMaxIndex +"  "+preMaxmultiScreenNum)
-
         listDeviceDataModel.move(0,restoreIndex,1);
 
         modelDataCurrentIndex = restoreIndex;
-
     }
 
-
     function addDevice(isCreateTcpConnect,strID,strAcc,strPwd,strIp,strPort){
-
 
         if (strID == null || strID == undefined || strID == ""){
 
@@ -537,11 +494,7 @@ Rectangle {
         }else
             listDeviceDataModel.append({did:strID,isCreateConnected:isCreateTcpConnect,account:strAcc,password:strPwd,ip:strIp,port:strPort});
 
-
-
     }
-
-
 
     function deleteDevice(tmpIndex){
 
@@ -550,12 +503,10 @@ Rectangle {
         if(tmpIsConnected > 0)
             listDeviceDid.remove(tmpIndex);
 
-
         if(listDeviceDataModel.count > multiScreenNum*multiScreenNum)
             listDeviceDataModel.remove(tmpIndex);
         else
             listDeviceDataModel.get(tmpIndex).isCreateConnected = 0;
-
 
     }
 

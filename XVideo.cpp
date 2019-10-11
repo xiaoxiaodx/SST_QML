@@ -10,11 +10,12 @@ XVideo::XVideo()
 
     initVariable();
 
-    createP2pThread();
-    //createTcpThread();
+    //createP2pThread();
+    createTcpThread();
     //creatDateProcessThread();
-    //createPlayAudio();
-    // createAviRecord();
+    createPlayAudio();
+     createAviRecord();
+    //createMp4RecordThread();
 
     connect(&timerUpdate,&QTimer::timeout,this,&XVideo::slot_timeout);
     timerUpdate.start(70);
@@ -44,6 +45,9 @@ void XVideo::initVariable()
     recordThread = nullptr;
     aviRecord = nullptr;
 
+    mp4Record = nullptr;
+    mp4RecordThread = nullptr;
+
     playAudio = nullptr;
     playAudioThread = nullptr;
 
@@ -51,7 +55,7 @@ void XVideo::initVariable()
 
     isImgUpdate  = false;
     isPlayAudio = false;
-    isRecordAvi =false;
+    isRecord =false;
     isScreenShot = false;
     isFirstData = false;
 
@@ -82,6 +86,26 @@ void XVideo::createFFmpegDecodec()
     }
 }
 
+void XVideo::createMp4RecordThread()
+{
+    if(mp4Record == nullptr){
+
+        mp4RecordThread = new QThread;
+        mp4Record = new Mp4Format;
+
+        connect(this,&XVideo::signal_recordAudio,mp4Record,&Mp4Format::slot_write_audio_frame);
+        connect(this,&XVideo::signal_recordVedio,mp4Record,&Mp4Format::slot_write_video_frame);
+        connect(this,&XVideo::signal_startRecord,mp4Record,&Mp4Format::slot_createMp4);
+        connect(this,&XVideo::signal_endRecord,mp4Record,&Mp4Format::slot_closeMp4);
+
+        connect(mp4RecordThread,&QThread::finished,mp4Record,&AviRecord::deleteLater);
+        connect(mp4RecordThread,&QThread::finished,mp4RecordThread,&QThread::deleteLater);
+
+        mp4Record->moveToThread(mp4RecordThread);
+        mp4RecordThread->start();
+
+    }
+}
 
 void XVideo::createAviRecord()
 {
@@ -89,14 +113,14 @@ void XVideo::createAviRecord()
     if(aviRecord == nullptr){
         recordThread = new QThread;
         aviRecord = new AviRecord("");
-//        connect(this,&XVideo::signal_recordAviAudio,aviRecord,&AviRecord::slot_writeAudio);
-//        connect(this,&XVideo::signal_recordAviVedio,aviRecord,&AviRecord::slot_writeVedio);
-//        connect(this,&XVideo::signal_startRecordAvi,aviRecord,&AviRecord::slot_startRecord);
-//        connect(this,&XVideo::signal_endRecordAvi,aviRecord,&AviRecord::slot_endRecord);
+        connect(this,&XVideo::signal_recordAudio,aviRecord,&AviRecord::slot_writeAudio);
+        connect(this,&XVideo::signal_recordVedio,aviRecord,&AviRecord::slot_writeVedio);
+        connect(this,&XVideo::signal_startRecord,aviRecord,&AviRecord::slot_startRecord);
+        connect(this,&XVideo::signal_endRecord,aviRecord,&AviRecord::slot_endRecord);
 
-//        connect(recordThread,&QThread::finished,aviRecord,&AviRecord::deleteLater);
-//        connect(recordThread,&QThread::finished,recordThread,&QThread::deleteLater);
-//        aviRecord->moveToThread(recordThread);
+        connect(recordThread,&QThread::finished,aviRecord,&AviRecord::deleteLater);
+        connect(recordThread,&QThread::finished,recordThread,&QThread::deleteLater);
+        aviRecord->moveToThread(recordThread);
         recordThread->start();
     }
 }
@@ -207,26 +231,18 @@ void XVideo::funPlayAudio(bool isPlay)
 void XVideo::funRecordVedio(bool isRecord)
 {
 
-    qDebug()<<"XVideo 录像 thread:"<<QThread::currentThreadId();
+    qDebug()<<"XVideo 录像 thread:"<<QThread::currentThreadId()<< isRecord;
 
-    isRecordAvi = isRecord;
+    this->isRecord = isRecord;
 
-    if(!isRecordAvi){
+    if(this->isRecord){
 
-        if(recordThread != nullptr)
-            recordThread->quit();
-
-        if(recordThread->wait()){
-            recordThread == nullptr;
-            aviRecord = nullptr;
-        }
+        emit signal_startRecord(mDid,1000);
 
     }else{
 
-        qDebug()<<"createAviRecord()  ";
-        createAviRecord();
+        emit signal_endRecord();
 
-        emit signal_startRecordAvi(mDid);
     }
 }
 
@@ -234,7 +250,21 @@ void XVideo::funScreenShot()
 {
     isScreenShot = true;
     if(m_Img != nullptr && (!m_Img->isNull())){
-        if(m_Img->save(mDid + "_"+QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss")+".png",0))
+
+        QString dir_str = "ScreenShot/"+mDid;
+
+        // 检查目录是否存在，若不存在则新建
+        QDir dir;
+        if (!dir.exists(dir_str))
+        {
+            bool res = dir.mkpath(dir_str);
+            qDebug() << "新建目录是否成功:" << res;
+        }
+
+        QString curTimeStr = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
+        QString filename = "./ScreenShot/"+mDid + "/"+mDid+"_" + curTimeStr+".png";
+
+        if(m_Img->save(filename,0))
             qDebug()<<"图片保存成功";
         else
             qDebug()<<"图片保存失败";
@@ -245,13 +275,8 @@ void XVideo::funScreenShot()
 void XVideo::slot_timeout()
 {
     //qDebug()<<"slot_timeout thread:"<<QThread::currentThreadId()<<" "<<listImgInfo.size();
-
-
     int size = listImgInfo.size();
-
     if(size >= 3){
-
-
         //如果不增加这句代码 ，则会出现视频不会第一时间显示，而是显示灰色图像
         if(!isFirstData){
             emit signal_loginStatus("Get the stream successfully");
@@ -263,14 +288,16 @@ void XVideo::slot_timeout()
 
     int preTimeOut = timerUpdate.interval();
 
-    int resetTimeout = 70;
-    if(size >= 90)
+    int resetTimeout;
+    if(size >= 45)
+        resetTimeout = 20;
+    else if( size >= 30)
         resetTimeout = 30;
-    else if( size >= 45)
-        resetTimeout = 50;
     else if(size >=15)
-        resetTimeout = 60;
+        resetTimeout = 40;
     else if(size >=8)
+        resetTimeout = 60;
+    else if(size >=0)
         resetTimeout = 70;
 
     if(preTimeOut != resetTimeout)
@@ -395,7 +422,7 @@ void XVideo::slot_recH264(char* h264Arr,int arrlen,quint64 time)
 
     createFFmpegDecodec();
 
-    emit signal_recordAviVedio(h264Arr,arrlen,time);
+    emit signal_recordVedio(h264Arr,arrlen,time);
 
     QImage *Img = nullptr;
     if(pffmpegCodec != nullptr){
@@ -427,7 +454,7 @@ void XVideo::slot_recPcmALaw( char * buff,int len,quint64 time)
     preAudioTime = time;
     createFFmpegDecodec();
 
-    emit signal_recordAviAudio(buff,len,time);
+    emit signal_recordAudio(buff,len,time);
 
     //声卡准备
     if(isAudioFirstPlay){

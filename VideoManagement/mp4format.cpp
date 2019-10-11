@@ -19,9 +19,9 @@ Mp4Format::Mp4Format(QObject *parent) : QObject(parent)
 
 
 
-    pcmfile = new QFile("playAudioSrc111.pcm");
-    if (!pcmfile->open(QIODevice::ReadOnly  |QIODevice::WriteOnly))
-        return;
+//    pcmfile = new QFile("playAudioSrc111.pcm");
+//    if (!pcmfile->open(QIODevice::ReadOnly  |QIODevice::WriteOnly))
+//        return;
 }
 
 void Mp4Format::open_audio(AVFormatContext *oc, AVCodec *codec, OutputStream *ost, AVDictionary *opt_arg)
@@ -29,14 +29,14 @@ void Mp4Format::open_audio(AVFormatContext *oc, AVCodec *codec, OutputStream *os
     AVCodecContext *c;
     int nb_samples;
     int ret;
-    AVDictionary *opt = NULL;
+
 
     c = ost->enc;
 
     /* open it */
-    av_dict_copy(&opt, opt_arg, 0);
-    ret = avcodec_open2(c, codec, &opt);
-    av_dict_free(&opt);
+
+    ret = avcodec_open2(c, codec, NULL);
+
     if (ret < 0) {
         // fprintf(stderr, "Could not open audio codec: %s\n", av_err2str(ret));
         exit(1);
@@ -54,8 +54,11 @@ void Mp4Format::open_audio(AVFormatContext *oc, AVCodec *codec, OutputStream *os
         nb_samples = c->frame_size;
 
     qDebug()<<"nb_samples11    "<<nb_samples;
+//    ost->frame     = av_frame_alloc();
+//    ost->tmp_frame = av_frame_alloc();
+
     ost->frame     = alloc_audio_frame(c->sample_fmt, c->channel_layout,
-                                       c->sample_rate, 1024);
+                                       c->sample_rate, 1764);
     ost->tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16, c->channel_layout,
                                        c->sample_rate, 1764);
 
@@ -119,7 +122,7 @@ void Mp4Format::open_video(AVFormatContext *oc, AVCodec *codec, OutputStream *os
 void Mp4Format::slot_createMp4(QString filenameStr,long long tempTime)
 {
     //char* filename = filenameStr.toLatin1().data();
-    char* filename = "hello.mp4";
+    char* filename = "hello1.mp4";
     qDebug()<<"MP4文件名:"<<filename;
     avformat_alloc_output_context2(&oc, NULL, NULL, filename);
     if (!oc) {
@@ -208,8 +211,7 @@ void Mp4Format::add_stream(OutputStream *ost, AVFormatContext *oc,AVCodec **code
 
     switch ((*codec)->type) {
     case AVMEDIA_TYPE_AUDIO:
-        c->sample_fmt  = (*codec)->sample_fmts ?
-                    (*codec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
+        c->sample_fmt  = AV_SAMPLE_FMT_FLTP;
         c->bit_rate    = 64000;
         c->sample_rate = 44100;
 //        if ((*codec)->supported_samplerates) {
@@ -279,8 +281,6 @@ void Mp4Format::add_stream(OutputStream *ost, AVFormatContext *oc,AVCodec **code
 AVFrame *Mp4Format::alloc_audio_frame(enum AVSampleFormat sample_fmt,uint64_t channel_layout,int sample_rate, int nb_samples)
 {
 
-
-
     AVFrame *frame = av_frame_alloc();
     int ret;
 
@@ -340,7 +340,7 @@ int Mp4Format::slot_write_audio_frame(char* data,int bufflen,long long tempTime)
 {
     // qDebug()<<"slot_write_audio_frame   "<<bufflen;
 
-    pcmfile->write(data,bufflen);
+    //pcmfile->write(data,bufflen);
 
     if(!have_audio)
         return -1;
@@ -358,7 +358,6 @@ int Mp4Format::slot_write_audio_frame(char* data,int bufflen,long long tempTime)
     AVFrame *frame = ost->tmp_frame;
 
     frame->data[0] = (uint8_t*)data;
-
     frame->linesize[0] = bufflen;
     //    frame->pts = ost->next_pts;
     //    ost->next_pts  += frame->nb_samples;
@@ -382,8 +381,8 @@ int Mp4Format::slot_write_audio_frame(char* data,int bufflen,long long tempTime)
         }
         /* convert to destination format */
         ret = swr_convert(ost->swr_ctx,
-                          ost->frame->data, dst_nb_samples,
-                          (const uint8_t **)frame->data, frame->nb_samples);
+                          ost->frame->data, 1764,
+                          (const uint8_t **)&data,bufflen);
 
         qDebug()<< "swr_convert info:"<<ret<<"  "<<dst_nb_samples<<"    "<<frame->nb_samples;
         if (ret < 0) {
@@ -391,27 +390,27 @@ int Mp4Format::slot_write_audio_frame(char* data,int bufflen,long long tempTime)
             return -1;
         }
 
-
         frame = ost->frame;
+        frame->linesize[0] = ret;
         frame->pts = av_rescale_q(ost->samples_count, (AVRational){1, c->sample_rate}, c->time_base);
         ost->samples_count += dst_nb_samples;
     }
 
-    ret = avcodec_encode_audio2(c, &pkt, frame, &got_packet);
-    if (ret < 0) {
-        qDebug()<<"Error encoding audio frame";
-        return -1;
-    }
 
-    if (got_packet) {
-        ret = write_frame(oc, &c->time_base, ost->st, &pkt);
-        if (ret < 0) {
-            qDebug()<< "Error while writing audio frame: ";
-            return -1;
+    if(0 == avcodec_send_frame(c, frame)){
+
+        if(0==avcodec_receive_packet(c, &pkt)){
+
+            ret = write_frame(oc, &c->time_base, ost->st, &pkt);
+            if (ret < 0) {
+                qDebug()<< "Error while writing audio frame: ";
+                return -1;
+            }
         }
     }
 
-    return (frame || got_packet) ? 0 : 1;
+
+    return  1;
 }
 
 
@@ -421,6 +420,8 @@ int Mp4Format::slot_write_audio_frame(char* data,int bufflen,long long tempTime)
  */
 int Mp4Format::slot_write_video_frame( char* data,int bufflen,long long tempTime)
 {
+
+    return 0;
     if(!have_video)
         return 0;
     //qDebug()<<"slot_write_video_frame";
@@ -466,6 +467,7 @@ void Mp4Format::slot_closeMp4()
 {
 
     have_video = false;
+    have_audio = false;
     int ret = av_write_trailer(oc);
 
     qDebug()<<"MP4 文件 写尾巴   "<<ret;

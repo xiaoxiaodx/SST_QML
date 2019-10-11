@@ -33,11 +33,24 @@ Rectangle {
 
             anchors.fill: parent
             color: "#00000000"
-            border.color: "white"
+
+            border.color: mIsSelected?"red":"white"
             border.width: 2
+
+
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                propagateComposedEvents:true
+
+
+                onClicked: {
+
+                    click();
+                }
+            }
         }
     }
-
 
     Component{
         id:xvideoComponet
@@ -99,8 +112,6 @@ Rectangle {
 
                     onClicked: {
 
-
-                        //    mouse.accepted = false
                         click();
                     }
                     onEntered: {

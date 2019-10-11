@@ -10,6 +10,7 @@
 #include <QAudioOutput>
 #include <QSGSimpleTextureNode>
 #include <QDateTime>
+#include <QDir>
 
 #include <QQuickWindow>
 #include "tcpworker.h"
@@ -17,6 +18,7 @@
 #include "dispatchmsgmanager.h"
 
 #include "p2pworker.h"
+#include "mp4format.h"
 
 class ImageInfo{
 
@@ -57,10 +59,10 @@ signals:
     void signal_playAudio(unsigned char * buff,int len,long pts);
     void signal_preparePlayAudio(int samplerate,int prenum,int bitwidth,int soundmode,long pts);
 
-    void signal_recordAviAudio(char *buff,int len,long long tempTime);
-    void signal_recordAviVedio(char *buff,int len,long long tempTime);
-    void signal_startRecordAvi(QString did);
-    void signal_endRecordAvi();
+    void signal_recordAudio(char *buff,int len,long long tempTime);
+    void signal_recordVedio(char *buff,int len,long long tempTime);
+    void signal_startRecord(QString did,long long tempTime);
+    void signal_endRecord();
 
 
 
@@ -85,6 +87,7 @@ private:
 
     void createTcpThread();
     void createP2pThread();
+    void createMp4RecordThread();
     void createFFmpegDecodec();
     void creatDateProcessThread();
     void createPlayAudio();
@@ -106,9 +109,11 @@ private:
     PlayAudio *playAudio;
     QThread *playAudioThread;
 
-
     QThread *recordThread;
     AviRecord *aviRecord;
+
+    QThread *mp4RecordThread;
+    Mp4Format *mp4Record;
 
 
     QTimer timerUpdate;
@@ -123,7 +128,7 @@ private:
     int minBuffLen;
 
     bool isPlayAudio;
-    bool isRecordAvi;
+    bool isRecord;
     bool isStartRecord;//是否启动录像
     bool isScreenShot;
     bool isAudioFirstPlay;

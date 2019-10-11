@@ -16,13 +16,12 @@ void AviRecord::slot_writeAudio(char* buff,int len,long long tempTime)
     if(pwriteHandle == nullptr)
         return;
 
-
-    long long  u64Pts = (tempTime  - startTime)/1000;
+    qint64 tmpPts = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    qint64  u64Pts = (tmpPts  - startTime)/1000;
 
    // qDebug()<<"writer_writeframe audio";
-    int s32Ret = writer_writeframe(pwriteHandle, 0, u64Pts,
+    int s32Ret = writer_writeframe(pwriteHandle, 1, u64Pts,
                                    (unsigned char*)buff, len, 1);
-
     if(s32Ret != KEY_TRUE)
     {
         DF_DEBUG("writer_writeframe audio failed %s \n");
@@ -33,11 +32,12 @@ void AviRecord::slot_writeAudio(char* buff,int len,long long tempTime)
 void AviRecord::slot_writeVedio(char* buff,int len,long long tempTime)
 {
 
-    qDebug()<<"write mp4 vedio";
+    //qDebug()<<"write avi vedio";
     if(pwriteHandle == nullptr)
         return;
 
-    long long  u64Pts = (tempTime  - startTime)/1000;
+    qint64 tmpPts = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    qint64  u64Pts = (tmpPts  - startTime)/1000;
 
    // qDebug()<<"writer_writeframe vedio";
     int s32Ret = writer_writeframe(pwriteHandle, 0, u64Pts,(unsigned char*)buff, len, 1);
@@ -52,10 +52,8 @@ void AviRecord::slot_startRecord(QString did,long long pts)
 {
 
     isInitSucc = false;
-
     if(pwriteHandle != nullptr)
         return;
-
 
     QString dir_str = "Avi_Record/"+did;
 
@@ -66,24 +64,17 @@ void AviRecord::slot_startRecord(QString did,long long pts)
         bool res = dir.mkpath(dir_str);
         qDebug() << "新建目录是否成功:" << res;
     }
+    startTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
 
-
-    QString filename = "./Avi_Record/"+did + "/"+did+"_" + QString::number(pts)+".avi";
-    startTime = pts;
+    QString filename = "./Avi_Record/"+did + "/"+did+"_" + QString::number(startTime)+".avi";
 
 
     QByteArray tmpArr = filename.toLatin1();
-
-//    char* tmpCh = (char*)malloc(tmpArr.size());
-
-
-//    memcpy(tmpCh,tmpArr.data(),tmpArr.size());
 
     qDebug()<<"filename"<<"   "<<tmpArr.data();
 
     int s32Ret = KEY_FALSE;
     s32Ret = writer_create(&pwriteHandle,tmpArr.data());
-
 
     //free(tmpCh);
     if(s32Ret != KEY_TRUE)
@@ -92,13 +83,11 @@ void AviRecord::slot_startRecord(QString did,long long pts)
         return;
     }
 
-
     int NoUseVar = 0;
     int* ps32VideoIndex = &NoUseVar;
     int* ps32AudioIndex = &NoUseVar;
 
     VIDEO_PARAM_S  bitMapInfo = {0};
-
 
     bitMapInfo.eCodeid = CODEC_TYPE_H264;//编码格式
     bitMapInfo.u32BiWidth = 1920;

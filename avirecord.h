@@ -4,7 +4,7 @@
 #include <QObject>
 #include "avformat.h"
 #include <QDebug>
-
+#include <QDateTime>
 #include "mediaqueue/common.h"
 
 
@@ -31,7 +31,7 @@ private:
 
     void *pwriteHandle;
     QString mDid;
-    long long startTime;
+    qint64 startTime;
     bool isInitSucc;
     //RecordManage_T g_recordManage[DF_MAX_REC_NUM];
 };
