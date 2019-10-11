@@ -81,6 +81,8 @@ private:
 
 
     QString m_did;
+    QString m_account;
+    QString m_password;
 
     unsigned short m_cmd;
     int m_validDatalen;

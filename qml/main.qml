@@ -41,7 +41,7 @@ ApplicationWindow {
 
     onVisibilityChanged: {
 
-        console.debug(" HomeContent:"+mhomecontent.x  + "   "+ mhomecontent.y)
+        //console.debug(" HomeContent:"+mhomecontent.x  + "   "+ mhomecontent.y)
         if(isSpecilState){
             if(main.visibility === 2){
                 main.visibility = "Maximized"

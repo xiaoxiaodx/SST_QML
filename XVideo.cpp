@@ -10,8 +10,8 @@ XVideo::XVideo()
 
     initVariable();
 
-    //createP2pThread();
-    createTcpThread();
+    createP2pThread();
+    //createTcpThread();
     //creatDateProcessThread();
     //createPlayAudio();
     // createAviRecord();

@@ -66,7 +66,8 @@ void P2pWorker::slot_connectDev(QString deviceDid,QString name,QString pwd)
 {
 
     m_did = deviceDid;
-
+    m_password = pwd;
+    m_account = name;
 
     if(!isP2pInitSucc)
         p2pinit();
@@ -235,8 +236,11 @@ void P2pWorker::processUnPkg(char *buff,int len)
 
                 qDebug()<<"找到 CMD_USR_KEY  内容:"<<m_serverKey<<"    ";
 
+                QString loginCmd = "authcfg -act checkuser -name "+m_account+" -passwd "+ m_password;
 
-                writeBuff(CMD_LOGIN,"authcfg -act checkuser -name -passwd admin",strlen("authcfg -act checkuser -name -passwd admin"));
+                qDebug()<<loginCmd.length() <<" "<<loginCmd.toLatin1().data();
+
+                writeBuff(CMD_LOGIN,loginCmd.toLatin1().data(),loginCmd.length());
 
                 writeBuff(CMD_GET_VIDEO_INFO,"vlive -act list -para 0 ",strlen("vlive -act list -para 0 "));
 
@@ -249,8 +253,15 @@ void P2pWorker::processUnPkg(char *buff,int len)
 
                 usr_decode(arr.data(), arr.length(),m_serverKey, serverKeyLen);
 
-                qDebug()<<"找到 CMD_LOGIN  内容:"<<QString(arr);
+                QString returnStr = QString(arr);
+                qDebug()<<"找到 CMD_LOGIN  内容:"<<returnStr;
 
+                if(returnStr.contains("error")){
+
+                    qDebug()<<"找到 CMD_LOGIN  内容:密码错误";
+                    emit signal_sendMsg(new MsgInfo(m_did+":wrong password, try to Re-add device",true));
+
+                }
             }else if(m_cmd == CMD_VIDEO_TRNS){
 
 
@@ -270,9 +281,7 @@ void P2pWorker::processUnPkg(char *buff,int len)
                 QByteArray arr ;
                 arr.append(readDataBuff.data(),needLen);
 
-
                 video_frame_header *video_pack= (video_frame_header*)(readDataBuff.data());
-
 
                 usr_decode(arr.data(), arr.length(),m_serverKey, serverKeyLen);
 

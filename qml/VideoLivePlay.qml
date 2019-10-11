@@ -319,11 +319,11 @@ Rectangle {
                 console.debug("recordBtnClickFun        ----"+mIsRecordVedio)
                 if(!mIsRecordVedio){
 
-                    s_showToastMsg("开始录像");
+                    s_showToastMsg("start record");
                     mIsRecordVedio = true;
 
                 }else{
-                     s_showToastMsg("结束录像");
+                     s_showToastMsg("end record");
                     mIsRecordVedio = false;
 
                 }
