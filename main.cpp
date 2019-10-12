@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 
     // XVideo 为QPaint显示视频(光栅绘图)
     qmlRegisterType<XVideo>("XVideo", 1, 0, "XVideo");
-    engine.load("qml/main.qml");
+    engine.load("../SSTQMLTC1/qml/main.qml");
 
     if (engine.rootObjects().isEmpty())
         return -1;

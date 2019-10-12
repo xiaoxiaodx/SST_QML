@@ -474,7 +474,7 @@ void TcpWorker::slot_tcpSendAuthentication(QString did,QString usrName,QString p
     if(did != ""){
 
 
-        emit signal_readMediaQueue();
+     //   emit signal_readMediaQueue();
 
 //        if(tcpSocket == nullptr){
 //            emit signal_sendMsg(new MsgInfo(tr("tcpSocket is not init")));

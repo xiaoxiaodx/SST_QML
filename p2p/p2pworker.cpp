@@ -65,9 +65,28 @@ void P2pWorker::stopWoring()
 void P2pWorker::slot_connectDev(QString deviceDid,QString name,QString pwd)
 {
 
-    m_did = deviceDid;
+
+
+    if(deviceDid.contains("SST")){
+
+        QStringList tmpDid = m_did.split("-");
+
+        int tmpNum = tmpDid.at(1).toInt();
+        tmpNum += 7700;
+        if(tmpNum <10000)
+            m_did = "INEW-0"+QString::number(tmpNum)+"-"+tmpDid.at(2);
+        else
+            m_did = "INEW-"+QString::number(tmpNum)+"-"+tmpDid.at(2);
+
+    }else
+        m_did = deviceDid;
+
+
+
     m_password = pwd;
     m_account = name;
+
+
 
     if(!isP2pInitSucc)
         p2pinit();
