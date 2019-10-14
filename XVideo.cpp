@@ -476,7 +476,7 @@ void XVideo::slot_recPcmALaw( char * buff,int len,quint64 time)
 void XVideo::slot_recMsg(MsgInfo * msg)
 {
 
-    qDebug()<<"slot_recMsg  "<<msg->msgContentStr;
+   // qDebug()<<"slot_recMsg  "<<msg->msgContentStr;
 
     if(mpDispatchMsgManager != nullptr)
         mpDispatchMsgManager->addMsg(msg);

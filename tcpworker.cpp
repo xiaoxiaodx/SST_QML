@@ -97,7 +97,7 @@ void TcpWorker::slot_timerConnectSer()
 void TcpWorker::slot_tcpConnected()
 {
 
-    qDebug()<<m_did <<" tcp连接成功";
+   // qDebug()<<m_did <<" tcp连接成功";
     isStartParsing = true;
     isConnected = true;
     slot_tcpSendAuthentication(m_did,m_usrName,m_password);
@@ -453,6 +453,7 @@ int TcpWorker::byteArr2Int(QByteArray arr)
 void TcpWorker::slot_tcpRecAuthentication(QString did,QString usrName,QString password)
 {
 
+
     m_did = did;
     m_usrName = usrName;
     m_password = password;
@@ -467,7 +468,7 @@ void TcpWorker::slot_tcpRecAuthentication(QString did,QString usrName,QString pa
 
 void TcpWorker::slot_tcpSendAuthentication(QString did,QString usrName,QString password)
 {
-    qDebug()<<"did usrName password:"<<did<<"   "<<usrName<<"   "<<password;
+   // qDebug()<<"did usrName password:"<<did<<"   "<<usrName<<"   "<<password;
 
 
 
@@ -512,13 +513,7 @@ void TcpWorker::slot_tcpSendAuthentication(QString did,QString usrName,QString p
 
         int writeLen = tcpSocket->write(arr.data(),arr.length());
 
-//        if(writeLen > 0)
-//            emit signal_sendMsg(tr("send bytes succ"));
-//        else
-//            emit signal_sendMsg(tr("send bytes failure"));
 
-       // qDebug()<<"DID"<<did<<"   arrlen："<<arr.length()<<"   sendMsg:writeLen="<<writeLen<<"  writedata:"<<arr.toHex();
-        //connect(tcpSocket,&QTcpSocket::readyRead,this,&TcpWorker::slot_readData);
 
     }
 }

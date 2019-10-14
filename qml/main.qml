@@ -98,10 +98,11 @@ ApplicationWindow {
 
             onSt_showToastMsg: {
 
+                showToast(str1)
                // console.debug(str1)
-                toastStr = str1;
-                loaderToast.sourceComponent = null;
-                loaderToast.sourceComponent = toast
+//                toastStr = str1;
+//                loaderToast.sourceComponent = null;
+//                loaderToast.sourceComponent = toast
 
             }
 
@@ -166,8 +167,17 @@ ApplicationWindow {
 
             mhomecontent.addDevice(1,strID,strAccoount,strPassword,strIp,strPort)
         }
+
+        onS_showToast: {
+            showToast(str1)
+        }
     }
 
+    function showToast(stri){
+        toastStr = stri;
+        loaderToast.sourceComponent = null;
+        loaderToast.sourceComponent = toast
+    }
 
 
     function saveWindowState(tChange)

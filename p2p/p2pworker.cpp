@@ -65,21 +65,32 @@ void P2pWorker::stopWoring()
 void P2pWorker::slot_connectDev(QString deviceDid,QString name,QString pwd)
 {
 
-
-
     if(deviceDid.contains("SST")){
 
-        QStringList tmpDid = m_did.split("-");
+        qDebug()<<"deviceDid  "<<deviceDid;
 
-        int tmpNum = tmpDid.at(1).toInt();
+        QString tmpNumStr = deviceDid.mid(3,6);
+
+        qDebug()<<"tmpNumStr  "<<tmpNumStr;
+
+        QString tmpTrailStr = deviceDid.mid(10,5);
+
+        qDebug()<<"tmpTrailStr  "<<tmpTrailStr;
+
+        int tmpNum = tmpNumStr.toInt();
+
+        qDebug()<<"tmpNum  "<<tmpNum;
         tmpNum += 7700;
-        if(tmpNum <10000)
-            m_did = "INEW-0"+QString::number(tmpNum)+"-"+tmpDid.at(2);
-        else
-            m_did = "INEW-"+QString::number(tmpNum)+"-"+tmpDid.at(2);
 
+        if(tmpNum <10000)
+            m_did = "INEW-00"+QString::number(tmpNum)+"-"+tmpTrailStr;
+        else if(tmpNum <100000)
+            m_did = "INEW-0"+QString::number(tmpNum)+"-"+tmpTrailStr;
+        else
+            m_did = "INEW-"+QString::number(tmpNum)+"-"+tmpTrailStr;
     }else
         m_did = deviceDid;
+
 
 
 
@@ -87,7 +98,7 @@ void P2pWorker::slot_connectDev(QString deviceDid,QString name,QString pwd)
     m_account = name;
 
 
-
+    qDebug()<<"m_did  "<<m_did<<"   "<<m_account<<"    "<<m_password;
     if(!isP2pInitSucc)
         p2pinit();
 
@@ -116,7 +127,7 @@ void P2pWorker::slot_connectDev(QString deviceDid,QString name,QString pwd)
             //qDebug()<<"signal_sendMsg";
             emit signal_sendMsg(new MsgInfo("device is not online",true));
         }
-        slot_connectDev(m_did,"admin","admin");
+        slot_connectDev(m_did,m_account,m_password);
     }
 
 }

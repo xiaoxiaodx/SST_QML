@@ -179,7 +179,7 @@ Rectangle {
 
                         if(modelDataCurrentIndex >= 0 && (index != modelDataCurrentIndex)){
 
-                            //console.debug("modelDataCurrentIndex  "+modelDataCurrentIndex+" index   "+index);
+                            console.debug("modelDataCurrentIndex  "+modelDataCurrentIndex+" index   "+index);
 
                             var minIndex ;
                             var maxIndex ;
@@ -196,8 +196,28 @@ Rectangle {
                             listDeviceDid.move(maxIndex-1,minIndex,1);
 
                             //交换位置
-                            listDeviceDataModel.move(minIndex,maxIndex,1);
-                            listDeviceDataModel.move(maxIndex-1,minIndex,1);
+                            var strDid1 = listDeviceDid.get(minIndex).did
+                            var strDid2 = listDeviceDid.get(maxIndex).did
+
+                            var tmpIndex1 = -1;
+                            var tmpIndex2 = -1;
+
+                            for(var tmpindex = 0;tmpindex < listDeviceDataModel.count;tmpindex++){
+                                if(listDeviceDataModel.get(tmpindex).did === strDid1 ){
+                                    tmpIndex1 = tmpindex;
+                                    break;
+                                }
+                            }
+                            for(tmpindex = 0;tmpindex < listDeviceDataModel.count;tmpindex++){
+                                if(listDeviceDataModel.get(tmpindex).did === strDid2 ){
+                                    tmpIndex2 = tmpindex;
+                                    break;
+                                }
+                            }
+                            console.debug("`````````````````    "+tmpIndex1 + " "+tmpIndex2 + " "+listDeviceDataModel.count)
+
+                            listDeviceDataModel.move(tmpIndex2,tmpIndex1,1);
+                            listDeviceDataModel.move(tmpIndex1-1,tmpIndex2,1);
 
                         }
                     }
@@ -391,11 +411,12 @@ Rectangle {
                             tx.executeSql('CREATE TABLE IF NOT EXISTS DeviceInfoList(did TEXT,isCreateConnected INTEGER, account TEXT,password TEXT, ip TEXT,port TEXT)');
                             var index = 0;
 
+
                             while (index < listDeviceDataModel.count) {
                                 var myItem = listDeviceDataModel.get(index);
 
 
-                                //console.debug(myItem.did +","+ myItem.isCreateConnected+","+myItem.account+","+ myItem.password+","+myItem.ip+","+myItem.port)
+                                console.debug(myItem.did +","+ myItem.isCreateConnected+","+myItem.account+","+ myItem.password+","+myItem.ip+","+myItem.port)
                                 tx.executeSql('INSERT INTO DeviceInfoList VALUES(?,?,?,?,?,?)', [myItem.did, myItem.isCreateConnected,myItem.account, myItem.password,myItem.ip,myItem.port]);
                                 index++;
                             }
@@ -499,14 +520,15 @@ Rectangle {
     function deleteDevice(tmpIndex){
 
         var tmpIsConnected = listDeviceDataModel.get(tmpIndex).isCreateConnected;
+        var tDid = listDeviceDataModel.get(tmpIndex).strID;
 
         if(tmpIsConnected > 0)
-            listDeviceDid.remove(tmpIndex);
+            listDeviceDid.remove(tDid);
 
-        if(listDeviceDataModel.count > multiScreenNum*multiScreenNum)
-            listDeviceDataModel.remove(tmpIndex);
-        else
-            listDeviceDataModel.get(tmpIndex).isCreateConnected = 0;
+        listDeviceDataModel.remove(tmpIndex);
+
+        if(listDeviceDataModel.count < multiScreenNum*multiScreenNum)
+            addDevice(0,"***","***","***","***","***");
 
     }
 

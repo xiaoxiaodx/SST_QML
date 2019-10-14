@@ -21,6 +21,8 @@ Popup {
 
     signal s_deviceIDstr(var strID,var strAccoount,var strPassword,var strIp,var strPort)
 
+    signal s_showToast(var str1)
+
     Rectangle {
         id: rect
         anchors.fill: parent
@@ -113,7 +115,7 @@ Popup {
                 width: 270
                 height: 34
                 placeholderText: qsTr("Enter ip")
-                text:"218.76.52.29"//"10.67.3.58"
+                text:"10.67.3.58"//"218.76.52.29"
 
             }
 
@@ -135,14 +137,32 @@ Popup {
 
             onClicked: {
 
-                //console.debug(ApplicationWindow +"," +window.y+","+window.width+","+window.height)
-                var did = input1.text;
-                var acc = input2.text;
-                var pwd = input3.text;
-                var ip = input4.text;
-                var port = input5.text;
+
+
+                var did = input1.text.replace(/ /g,"");
+                var acc = input2.text.replace(/ /g,"");
+                var pwd = input3.text.replace(/ /g,"");
+                var ip = input4.text.replace(/ /g,"");
+                var port = input5.text.replace(/ /g,"");
+
+
+                input1.text = did
+                input2.text = acc
+                input3.text = pwd
+                input4.text = ip
+                input5.text = port
+
+
+                var didFirstChar = did.charAt(0);
+
+                 if(((didFirstChar >= 'A' && didFirstChar <= 'Z') || (didFirstChar >= 'a' && didFirstChar <= 'z')));
+                 else{
+                    s_showToast("did input error")
+                     return;
+                 }
 
                 s_deviceIDstr(did,acc,pwd,ip,port)
+
                 root.close()
             }
         }
