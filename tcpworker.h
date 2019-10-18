@@ -21,6 +21,8 @@
 #include "avirecord.h"
 #include "dispatchmsgmanager.h"
 
+#include "mqtt/mqttwork.h"
+
 #define MAX_AUDIO_FRAME_SIZE 192000
 
 class TcpWorker : public QObject
@@ -46,6 +48,7 @@ signals:
     void signal_endWait();
     void signal_workFinished();
 
+    void finish();
 public slots:
 
     void slot_readData();
@@ -54,8 +57,10 @@ public slots:
 
 
     void slot_timerConnectSer();
+    void slot_disConnectSer();
     void slot_tcpSendAuthentication(QString did,QString name,QString pwd);
     void slot_tcpRecAuthentication(QString did,QString name,QString pwd);
+
     void slot_destory();
 
     void creatNewTcpConnect(QString ip,int port);
@@ -64,6 +69,7 @@ public slots:
     void stopParsing();
 private:
 
+
     /*********************************/
     int saveVideoInfo(QByteArray &arr);
     int saveAudioInfo(QByteArray &arr);
@@ -71,7 +77,7 @@ private:
     QueueAudioInputInfo_T infoA;
 
     /*********************************/
-    void writeDebugfile(QString str);
+    void writeDebugfile(QString filename,QString funname,int lineCount,QString strContent);
     int byteArr2Int(QByteArray arr);
     void parseRecevieData();
 
@@ -101,7 +107,7 @@ private:
     bool isReconnecting;
 
 
-    QFile *debugfile;
+
     QFile *audioSrc;
 
     int videoFrameMaxLen;

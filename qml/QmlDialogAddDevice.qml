@@ -115,7 +115,7 @@ Popup {
                 width: 270
                 height: 34
                 placeholderText: qsTr("Enter ip")
-                text:"10.67.3.58"//"218.76.52.29"
+                text:"218.76.52.29"//"10.67.3.58"
 
             }
 

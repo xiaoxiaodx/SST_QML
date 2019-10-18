@@ -51,8 +51,8 @@ TabBar {
 
          currentIndex = parIntex;
 
-        console.debug("setSelectItem    "+ parIntex);
-        console.debug("lastIndex    "+ lastIndex);
+//        console.debug("setSelectItem    "+ parIntex);
+//        console.debug("lastIndex    "+ lastIndex);
 
         repeater.itemAt(lastIndex).imageSource = myModel.get(lastIndex).modelSrc;
 

@@ -12,18 +12,18 @@ XVideo::XVideo()
 
     //createP2pThread();
     createTcpThread();
-    //creatDateProcessThread();
     createPlayAudio();
-     createAviRecord();
+    createAviRecord();
+
+
     //createMp4RecordThread();
 
     connect(&timerUpdate,&QTimer::timeout,this,&XVideo::slot_timeout);
-    timerUpdate.start(70);
+
 
     //消息分发定时器
     connect(mpDispatchMsgManager,&DispatchMsgManager::signal_sendToastMsg,this,&XVideo::slot_sendToastMsg);
 }
-
 
 void XVideo::initVariable()
 {
@@ -31,7 +31,7 @@ void XVideo::initVariable()
     listImgInfo.clear();
 
 
-    minBuffLen = 150;
+    minBuffLen = 15;
 
     m_threadReadDate = nullptr;
     m_dataProcess = nullptr;
@@ -53,11 +53,14 @@ void XVideo::initVariable()
 
     pffmpegCodec = nullptr;
 
+
+
     isImgUpdate  = false;
     isPlayAudio = false;
     isRecord =false;
     isScreenShot = false;
     isFirstData = false;
+
 
     isAudioFirstPlay = true;
 
@@ -65,9 +68,7 @@ void XVideo::initVariable()
     isStartRecord = false;
 
     m_Img = new QImage();
-
-
-
+    m_Img->fill(QColor("black"));
     preAudioTime = 0;
 
     mpDispatchMsgManager = DispatchMsgManager::getInstance();
@@ -83,7 +84,12 @@ void XVideo::createFFmpegDecodec()
         pffmpegCodec->vNakedStreamDecodeInit(AV_CODEC_ID_H264);
         pffmpegCodec->aNakedStreamDecodeInit(AV_CODEC_ID_PCM_ALAW,AV_SAMPLE_FMT_S16,8000,1);
         pffmpegCodec->resetSample(AV_CH_LAYOUT_MONO,AV_CH_LAYOUT_MONO,8000,44100,AV_SAMPLE_FMT_S16,AV_SAMPLE_FMT_S16,160);
+
+
+        if(m_readThread != nullptr)
+            connect(m_readThread,&QThread::finished,pffmpegCodec,&FfmpegCodec::deleteLater);
     }
+
 }
 
 void XVideo::createMp4RecordThread()
@@ -167,9 +173,14 @@ void XVideo::createTcpThread()
     connect(worker,&TcpWorker::signal_endWait,this,&XVideo::slot_trasfer_endLoad);
 
     connect(this,&XVideo::signal_connentSer,worker,&TcpWorker::creatNewTcpConnect);
+    connect(this,&XVideo::signal_disconnentSer,worker,&TcpWorker::slot_disConnectSer);
+
     connect(this,&XVideo::signal_tcpSendAuthentication,worker,&TcpWorker::slot_tcpRecAuthentication,Qt::DirectConnection);
+
+
     connect(this,&XVideo::signal_destoryTcpWork,worker,&TcpWorker::slot_destory);
-    connect(worker,&TcpWorker::signal_workFinished,m_readThread,&QThread::quit);
+
+
     connect(m_readThread,&QThread::finished,worker,&TcpWorker::deleteLater);
     connect(m_readThread,&QThread::finished,m_readThread,&QThread::deleteLater);
     m_readThread->start();
@@ -277,26 +288,25 @@ void XVideo::slot_timeout()
     //qDebug()<<"slot_timeout thread:"<<QThread::currentThreadId()<<" "<<listImgInfo.size();
     int size = listImgInfo.size();
     if(size >= 3){
+
+
         //如果不增加这句代码 ，则会出现视频不会第一时间显示，而是显示灰色图像
         if(!isFirstData){
-            emit signal_loginStatus("Get the stream successfully");
-            isFirstData = true;
-        }
 
+                emit signal_loginStatus("Get the stream successfully");
+                isFirstData = true;
+            }
+
+        }
         update();
-    }
 
     int preTimeOut = timerUpdate.interval();
 
     int resetTimeout;
-    if(size >= 45)
-        resetTimeout = 20;
-    else if( size >= 30)
+    if(size >=12)
         resetTimeout = 30;
-    else if(size >=15)
-        resetTimeout = 40;
-    else if(size >=8)
-        resetTimeout = 60;
+    else if(size >=6)
+        resetTimeout = 50;
     else if(size >=0)
         resetTimeout = 70;
 
@@ -335,13 +345,20 @@ void XVideo::sendAuthentication(QString did,QString name,QString pwd)
 void XVideo::connectServer(QString ip, QString port)
 {
 
-    //emit signal_constructed();
+    timerUpdate.start(70);
     emit signal_connentSer(ip,port.toInt());
+}
+
+void XVideo::disConnectServer()
+{
+
+    emit signal_disconnentSer();
+    timerUpdate.stop();
 }
 
 QSGNode* XVideo::updatePaintNode(QSGNode *old, UpdatePaintNodeData *data)
 {
-   // qDebug()<<"XVideo updatePaintNode thread:"<<QThread::currentThreadId()<<"   "<<listImgInfo.size();
+    // qDebug()<<"XVideo updatePaintNode thread:"<<QThread::currentThreadId()<<"   "<<listImgInfo.size();
     QSGSimpleTextureNode *oldTexture = static_cast<QSGSimpleTextureNode*>(old);
 
     if (oldTexture == NULL) {
@@ -420,6 +437,8 @@ QSGNode* XVideo::updatePaintNode(QSGNode *old, UpdatePaintNodeData *data)
 void XVideo::slot_recH264(char* h264Arr,int arrlen,quint64 time)
 {
 
+
+    //qDebug()<<"11111111111";
     createFFmpegDecodec();
 
     emit signal_recordVedio(h264Arr,arrlen,time);
@@ -439,8 +458,6 @@ void XVideo::slot_recH264(char* h264Arr,int arrlen,quint64 time)
 
                 listImgInfo.append(imgInfo);
 
-                //这里是使用信号连接类内的函数，是update函数需要在主线程中调用，而当前函数不在主线程中运行
-                //emit signal_update();
             }else
                 delete Img;
         }
@@ -466,7 +483,6 @@ void XVideo::slot_recPcmALaw( char * buff,int len,quint64 time)
             QByteArray arr;
             pffmpegCodec->decodeAFrame((unsigned char*)buff,len,arr);
 
-
             if(isPlayAudio)
                 emit signal_playAudio((unsigned char*)arr.data(),arr.length(),time);
         }
@@ -476,12 +492,12 @@ void XVideo::slot_recPcmALaw( char * buff,int len,quint64 time)
 void XVideo::slot_recMsg(MsgInfo * msg)
 {
 
-   // qDebug()<<"slot_recMsg  "<<msg->msgContentStr;
-
-    if(mpDispatchMsgManager != nullptr)
+    if(mpDispatchMsgManager != nullptr){
+        msg->msgDid = mDid;
         mpDispatchMsgManager->addMsg(msg);
+    }
 
-    //emit signal_loginStatus(msg);
+
 }
 
 void XVideo::slot_sendToastMsg(MsgInfo * msg){
@@ -506,14 +522,17 @@ XVideo::~XVideo()
     qDebug()<<mDid + " 析构   XVideo";
 
     //析构tcpworker
-    {
-        if(worker != nullptr)
-        {
 
-            qDebug()<<mDid <<" signal_destoryTcpWork";
-            emit signal_destoryTcpWork();
-        }
+    if(worker != nullptr)
+    {
+        emit signal_destoryTcpWork();
+
+        worker->stopParsing();
+
+        m_readThread->quit();
+
     }
+
 
     //析构meidiadateprocess
     if(m_dataProcess != nullptr)
@@ -537,9 +556,12 @@ XVideo::~XVideo()
     if(playAudioThread != nullptr)
         playAudioThread->quit();
 
+
     if(pffmpegCodec != nullptr)
         pffmpegCodec->deleteLater();
 
+
+    qDebug()<<mDid + " 3333";
     if(p2pWorker != nullptr){
 
         p2pWorker->stopWoring();
@@ -547,5 +569,8 @@ XVideo::~XVideo()
         m_p2pThread->quit();
 
     }
+
+
+    qDebug()<<mDid + " 析构   XVideo 结束";
 }
 

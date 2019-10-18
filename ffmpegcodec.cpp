@@ -86,6 +86,7 @@ void FfmpegCodec::aNakedStreamDecodeInit(AVCodecID codecId,AVSampleFormat sample
 void FfmpegCodec::vNakedStreamDecodeInit(AVCodecID codecId)
 {
 
+
     if(m_pVCodec == nullptr){
         m_pVCodec = avcodec_find_decoder(codecId);//找到编解码器类型，AVCodec         *m_pCodec，是存储解码器的信息的结构体
 
@@ -136,8 +137,6 @@ void FfmpegCodec::vNakedStreamDecodeInit(AVCodecID codecId)
         return ;
     }
 
-
-
     av_init_packet(&m_AVPacket);
 
     qDebug()<<"视频裸流解析初始化完成";
@@ -154,7 +153,6 @@ QImage* FfmpegCodec::decodeVFrame(uint8_t *buff,int bufflen)
 
         if(0 == avcodec_receive_frame(m_pVCodecCtx,m_pAVFrame))
         {
-
 
             //解决：deprecated pixel format used, make sure you did set range correctly
             AVPixelFormat pixFormat;
@@ -204,9 +202,6 @@ QImage* FfmpegCodec::decodeVFrame(uint8_t *buff,int bufflen)
                 }
 
                 return pImage;
-
-
-
 
             }
         }
@@ -362,6 +357,7 @@ FfmpegCodec::~FfmpegCodec()
 
     qDebug()<<"析构   FfmpegCodec";
 
+
     if(m_pAVFrame != nullptr)
         av_frame_free(&m_pAVFrame);
 
@@ -379,7 +375,7 @@ FfmpegCodec::~FfmpegCodec()
 
     if(m_pVoutBuffer != nullptr)
         av_free(m_pVoutBuffer);
-
+     qDebug()<<"析构   FfmpegCodec 结束";
 }
 
 

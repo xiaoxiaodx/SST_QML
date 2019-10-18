@@ -3,15 +3,14 @@ import QtQuick.Controls 1.4
 import QtQuick.Window 2.12
 import QtQml 2.12
 
-ApplicationWindow {
+
+Window {
 
     id: main;
     visible: true
     flags:Qt.FramelessWindowHint |
           Qt.WindowMinimizeButtonHint |
           Qt.Window
-
-
 
     property bool fullscreen: false
     property bool isPress: false
@@ -25,18 +24,16 @@ ApplicationWindow {
 
     property string toastStr: ""
 
-
-
-
     property bool isSpecilState: false      //窗口在最大化的时候调用最小化 会出现特例（窗口还原后大小不再是最大化了）
 
     minimumWidth:  Screen.desktopAvailableWidth/2
     minimumHeight: Screen.desktopAvailableHeight/2
 
+    width: Screen.desktopAvailableWidth/2
+    height: Screen.desktopAvailableHeight/2
 
     visibility : "Maximized"
     color: "#BDBDBD"
-
 
 
     onVisibilityChanged: {
@@ -50,10 +47,12 @@ ApplicationWindow {
         }
 
     }
+
     Rectangle{
         id:rect
-        width: parent.width
-        height: parent.height
+
+        width: main.width
+        height: main.height
         color: "#BDBDBD"
         HomeTitleBar{
             id:mTitleBar
@@ -84,6 +83,24 @@ ApplicationWindow {
 
         }
 
+        HomeStateBar{
+
+            id:mhomeState
+            anchors.top:mhomecontent.bottom
+            anchors.topMargin: 2
+            width: parent.width
+            height: 65
+            z:3
+            onS_multiScreenNumChange: {
+                //几乘几的屏幕显示
+                //mhomecontent.setMultiScreen(num);
+
+                if(num < 5)
+                    mhomecontent.setMultiScreenNum (num);
+
+            }
+        }
+
         HomeContent{
             id:mhomecontent
             anchors.top: mTitleBar.bottom
@@ -99,43 +116,23 @@ ApplicationWindow {
             onSt_showToastMsg: {
 
                 showToast(str1)
-               // console.debug(str1)
-//                toastStr = str1;
-//                loaderToast.sourceComponent = null;
-//                loaderToast.sourceComponent = toast
+
 
             }
 
             onS_multiScreenNumChange:{
 
-               // console.debug("onS_selectScreen:"+sParIndex)
+                mhomeState.setSelectItem (num)
 
-                mhomeState.multiScreenNum = num
+            }
 
-              //  console.debug("onS_selectScreen:                        111111"+sParIndex)
+            onS_mqttLoginSucc: {
+                    myLogin.close();
             }
 
         }
 
-        HomeStateBar{
 
-            id:mhomeState
-            anchors.top:mhomecontent.bottom
-            anchors.topMargin: 2
-            width: parent.width
-            height: 65
-            z:3
-            onS_multiScreenNumChange: {
-                //几乘几的屏幕显示
-                //mhomecontent.setMultiScreen(num);
-
-                if(num < 5)
-                    mhomecontent.multiScreenNum = num;
-
-            }
-
-
-        }
 
 
         Loader{
@@ -172,6 +169,23 @@ ApplicationWindow {
             showToast(str1)
         }
     }
+
+    QmlLogin{
+        id:myLogin
+        visible: true
+
+        onS_Login: {
+            mhomecontent.mqttLogin(accout,pwd)
+        }
+        onS_connectSer: {
+
+            mqttestt.connectServer("10.67.1.167",1883)
+            //mhomecontent.mqttConnet(ip,port)
+        }
+
+    }
+
+
 
     function showToast(stri){
         toastStr = stri;
@@ -240,8 +254,4 @@ ApplicationWindow {
             timer.start();
         }
     }
-
-
 }
-
-

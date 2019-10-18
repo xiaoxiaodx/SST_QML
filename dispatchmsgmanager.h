@@ -5,6 +5,8 @@
 #include <QList>
 #include <QTimer>
 #include <QDebug>
+#include <QTextStream>
+
 enum MsgType{
     UNDEFINE = -1,
     MSG_TOAST = 0,  //吐丝
@@ -38,6 +40,7 @@ public:
     }
 
     int msgID = -1;
+    QString msgDid = "";
     MsgType msgType = MSG_TOAST;
     qint64 msgProductionDate = 0;       //消息产生的时间
     QString msgProductionFileName = ""; //消息产生的文件名

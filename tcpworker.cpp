@@ -11,6 +11,7 @@ TcpWorker::TcpWorker(QObject *parent) : QObject(parent)
 
     readDataBuff.clear();
 
+
     audioSrc = new QFile("playAudioSrc.pcm");
     if (!audioSrc->open(QIODevice::ReadOnly  |QIODevice::WriteOnly))
         return;
@@ -18,8 +19,6 @@ TcpWorker::TcpWorker(QObject *parent) : QObject(parent)
 
 void TcpWorker::initVariable()
 {
-
-    debugfile = nullptr;
     videoFrameMaxLen = 1024 * 3500;
     audioFrameMaxLen = 160;
 
@@ -63,15 +62,30 @@ void TcpWorker::creatNewTcpConnect(QString ip, int port)
         tcpSocket->setReadBufferSize(1024*1024);
         tcpSocket->connectToHost(this->ip,this->port);
         timerConnectSer->start(3000);
+    }else{
+
+        tcpSocket->connectToHost(this->ip,this->port);
+        timerConnectSer->start(3000);
+
     }
 
-     qDebug()<<"tcp连接创建完成"+m_did;
+    qDebug()<<"tcp连接创建完成"+m_did;
+}
+
+void TcpWorker::slot_disConnectSer()
+{
+    timerConnectSer->stop();
+    tcpSocket->abort();
+
+    readDataBuff.clear();
 }
 
 //定时对tcp做连接 以达到自动重连的目的
 void TcpWorker::slot_timerConnectSer()
 {
 
+
+     //qDebug()<<"slot_timerConnectSer";
     if(!isConnected){
 
         if(tcpSocket != nullptr){
@@ -97,7 +111,7 @@ void TcpWorker::slot_timerConnectSer()
 void TcpWorker::slot_tcpConnected()
 {
 
-   // qDebug()<<m_did <<" tcp连接成功";
+    // qDebug()<<m_did <<" tcp连接成功";
     isStartParsing = true;
     isConnected = true;
     slot_tcpSendAuthentication(m_did,m_usrName,m_password);
@@ -375,7 +389,7 @@ void TcpWorker::parseRecevieData()
 
                 emit signal_sendPcmALaw(readDataBuff.data(),m_streamDateLen,pts);
 
-               QThread::msleep(10);
+                QThread::msleep(10);
 
                 readDataBuff.remove(0,m_streamDateLen);
                 //qDebug()<<"Send audioQueue";
@@ -387,8 +401,8 @@ void TcpWorker::parseRecevieData()
         }
         else if(MediaType_MSG  == mediaDataType)
         {
-//            qDebug()<<this->m_did <<"    777";
-//            qDebug()<<"find MediaType_MSG";
+            //            qDebug()<<this->m_did <<"    777";
+            //            qDebug()<<"find MediaType_MSG";
             needlen = 136;
             if(readDataBuff.length() >= needlen){
                 int index = 0;
@@ -421,16 +435,14 @@ void TcpWorker::parseRecevieData()
             }
         }
 
-        writeDebugfile("  无效数据: needlen:"+QString::number(needlen)+"   datalen"+QString::number(readDataBuff.length()));
+
         resetAVFlag();
         needlen = 2;
 
 
-        writeDebugfile("  数据循环结束:");
     }
 
     if(!isStartParsing){
-
         deleteLater();
     }
 }
@@ -459,34 +471,15 @@ void TcpWorker::slot_tcpRecAuthentication(QString did,QString usrName,QString pa
     m_password = password;
 
 
-//    if(debugfile == nullptr){
-//        debugfile = new QFile(m_did + "_debuglog.txt");
-//        if (!debugfile->open(QIODevice::WriteOnly | QIODevice::Text))
-//            return;
-//    }
+
+    writeDebugfile(__FILE__ ,__FUNCTION__,__LINE__,"1");
 }
 
 void TcpWorker::slot_tcpSendAuthentication(QString did,QString usrName,QString password)
 {
-   // qDebug()<<"did usrName password:"<<did<<"   "<<usrName<<"   "<<password;
-
-
+    // qDebug()<<"did usrName password:"<<did<<"   "<<usrName<<"   "<<password;
 
     if(did != ""){
-
-
-     //   emit signal_readMediaQueue();
-
-//        if(tcpSocket == nullptr){
-//            emit signal_sendMsg(new MsgInfo(tr("tcpSocket is not init")));
-//            return;
-//        }
-//        if(!tcpSocket->isWritable()){
-//            emit signal_sendMsg(new MsgInfo(tr("tcpSocket is not write")));
-//            return;
-//        }
-
-
         //disconnect(tcpSocket,&QTcpSocket::readyRead,this,&TcpWorker::slot_readData);
         QByteArray arr;
 
@@ -512,9 +505,6 @@ void TcpWorker::slot_tcpSendAuthentication(QString did,QString usrName,QString p
         arr.append(64-password.size(),0);
 
         int writeLen = tcpSocket->write(arr.data(),arr.length());
-
-
-
     }
 }
 
@@ -528,39 +518,43 @@ void TcpWorker::startParsing()
 void TcpWorker::stopParsing()
 {
 
+
+
+
 }
 
 void TcpWorker::slot_destory()
 {
-
-    qDebug()<<m_did + " delete   slot_destory";
-
+    qDebug()<<"slot_destory1";
 
     isStartParsing = false;
 
-    if(timerConnectSer != nullptr ){
-
-        if(timerConnectSer->isActive())
-            timerConnectSer->stop();
-
-        timerConnectSer->deleteLater();
-
-    }
 
 }
 
-void TcpWorker::writeDebugfile(QString str){
+void TcpWorker::writeDebugfile(QString filename,QString funname,int lineCount,QString strContent){
 
-
-    if(debugfile != nullptr){
-        QTextStream out(debugfile);
-        out << str << "\n";
-    }
+    MsgInfo *msg = new MsgInfo(strContent,false);
+    msg->msgType = MSG_DEBUGLOG;
+    msg->msgProductionFunName = funname;
+    msg->msgProductionFileName = filename;
+    msg->msgProductionCodeLine = lineCount;
+    emit signal_sendMsg(msg);
 }
+
+
+
 
 TcpWorker::~TcpWorker()
 {
     qDebug()<<m_did +  " 析构   tcpWorker";
+
+
+    if(timerConnectSer != nullptr)
+    {
+        timerConnectSer->stop();
+        disconnect(timerConnectSer,&QTimer::timeout,this,&TcpWorker::slot_timerConnectSer);
+    }
 
 
 
@@ -568,13 +562,14 @@ TcpWorker::~TcpWorker()
     {
         disconnect(tcpSocket,&QTcpSocket::readyRead,this,&TcpWorker::slot_readData);
         disconnect(tcpSocket,&QTcpSocket::disconnected,this,&TcpWorker::slot_tcpDisconnected);
+        disconnect(tcpSocket,&QTcpSocket::connected,this,&TcpWorker::slot_tcpConnected);
         tcpSocket->abort();
         tcpSocket->close();
-        //delete tcpSocket;
+        tcpSocket == nullptr;
     }
 
-    if(debugfile != nullptr)
-        debugfile->close();
+
+    qDebug()<<m_did +  " 析构   tcpWorker 结束";
 }
 
 

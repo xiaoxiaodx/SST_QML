@@ -40,7 +40,9 @@ HEADERS += \
     avirecord.h \
     dispatchmsgmanager.h \
     VideoManagement/mp4format.h \
-    p2p/p2pworker.h
+    p2p/p2pworker.h \
+    mqtt/mqttpacket.h \
+    mqtt/mqttwork.h
 
 SOURCES += main.cpp \
     qmllanguage.cpp \
@@ -60,21 +62,28 @@ SOURCES += main.cpp \
     avirecord.cpp \
     dispatchmsgmanager.cpp \
     VideoManagement/mp4format.cpp \
-    p2p/p2pworker.cpp
+    p2p/p2pworker.cpp \
+    mqtt/mqttpacket.cpp \
+    mqtt/mqttwork.cpp
 
 
-# Additional import path used to resolve QML modules in Qt Creator's code model
-#QML_IMPORT_PATH =
 
-# Default rules for deployment.
 include(deployment.pri)
+
+
+#P2P 库
 LIBS+= -L $$PWD/third/p2p_ppcs/ -l PPCS_API
 INCLUDEPATH += $$PWD/third/p2p_ppcs/include \
                $$PWD/P2P/
 
-
+#AVI 录像库
 INCLUDEPATH += $$PWD/avi \
                $$PWD/VideoManagement
+#MQTT 通信 库
+INCLUDEPATH += $$PWD/third/mqtt/include
+LIBS += $$PWD/third/mqtt/lib/libQt5Mqttd.a \
+        $$PWD/third/mqtt/lib/libQt5Mqtt.a \
+
 
 
 #因为移动端的ffmpeg和
@@ -91,7 +100,6 @@ LIBS += $$PWD/third/ffmpeg/lib/avcodec.lib \
         $$PWD/third/ffmpeg/lib/swscale.lib
 
 }
-
 
 android{
 INCLUDEPATH += $$PWD/third/ffmpeg/include
@@ -118,8 +126,6 @@ contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 }
 }
 
-RESOURCES += \
-    res.qrc
 
 DISTFILES += \
     qml/HomeContent.qml \
@@ -135,14 +141,13 @@ DISTFILES += \
     qml/QmlVideo.qml \
     qml/QmlWaitingEllipsis.qml \
     qml/QmlWatingBusy.qml \
-    qml/VideoLivePlay.qml
+    qml/VideoLivePlay.qml \
+    qml/QmlLogin.qml \
+    qml/HomeContentBackup.qml \
+    qml/VedioLayout.qml
 
-
-
-
-
-
-
+RESOURCES += \
+    qrc.qrc
 
 
 

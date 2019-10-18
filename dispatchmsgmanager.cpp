@@ -64,9 +64,9 @@ void DispatchMsgManager::slot_timeOut()
 
         }else {
 
-
-                listMsg.removeAt(i);
-                continue;
+            dispatchMsg(msg);
+            listMsg.removeAt(i);
+            continue;
         }
     }
 
@@ -77,18 +77,33 @@ void DispatchMsgManager::dispatchMsg(MsgInfo *msg){
 
 
 
-     qDebug()<<"****** dispatchMsg *******    "<<timeCount<<","<<msg->msgContentStr ;
+//    qDebug()<<"****** dispatchMsg *******    "<<timeCount<<","<<msg->msgContentStr ;
 
     if(msg->msgType == MSG_TOAST)
         emit signal_sendToastMsg(msg);
+    else if(msg->msgType == MSG_DEBUGLOG){
 
+
+        qDebug()<<"MSG_DEBUGLOG" ;
+        QFile debugFile(msg->msgDid+".txt");
+
+
+        if(!debugFile.isOpen())
+            if (!debugFile.open(QIODevice::ReadOnly  |QIODevice::WriteOnly))
+                return;
+
+
+        QString str = "debuglog:"+msg->msgProductionFileName + "---"+msg->msgProductionFunName+"---"+QString::number(msg->msgProductionCodeLine) + "    "+msg->msgContentStr;
+        QTextStream txtOutput(&debugFile);
+        txtOutput << str<< endl;
+    }
 
 }
 
 void DispatchMsgManager::addMsg(MsgInfo *info)
 {
 
-   // qDebug()<<"****** addMsg *******    "<<info->msgContentStr;
+    // qDebug()<<"****** addMsg *******    "<<info->msgContentStr;
 
     if(info->isNeedRepeat){
 

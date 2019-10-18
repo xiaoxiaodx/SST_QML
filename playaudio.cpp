@@ -170,4 +170,6 @@ PlayAudio::~PlayAudio(){
         streamOut->close();
     }
 
+    qDebug()<<"析构   PlayAudio 结束";
+
 }

@@ -16,9 +16,10 @@
 #include "tcpworker.h"
 #include "playaudio.h"
 #include "dispatchmsgmanager.h"
-
 #include "p2pworker.h"
 #include "mp4format.h"
+
+
 
 class ImageInfo{
 
@@ -33,36 +34,40 @@ public:
 
     Q_INVOKABLE void sendAuthentication(QString did,QString name,QString pwd);
     Q_INVOKABLE void connectServer(QString ip,QString port);
+    Q_INVOKABLE void disConnectServer();
     Q_INVOKABLE void funPlayAudio(bool isPlay);
     Q_INVOKABLE void funRecordVedio(bool isRecord);
     Q_INVOKABLE void funScreenShot();
+
 
     explicit XVideo();
     ~XVideo();
 
 signals:
-
+    //tcp
     void signal_connentSer(QString ip,int port);
+    void signal_disconnentSer();
     void signal_tcpSendAuthentication(QString did,QString name,QString pwd);
+    void signal_destoryTcpWork();
+    //qml
     void signal_loginStatus(QString msg);
     void signal_waitingLoad(QString msgload);
     void signal_endLoad();
-
+    //audio
     void signal_stopPlayAudio();
     void signal_startPlayAudio();
-    void signal_destoryTcpWork();
-
-    void signals_p2pDowork();//p2p
-
-    void signal_update();
-
     void signal_playAudio(unsigned char * buff,int len,long pts);
     void signal_preparePlayAudio(int samplerate,int prenum,int bitwidth,int soundmode,long pts);
-
+    //p2p
+    void signals_p2pDowork();
+    //
+    void signal_update();
+    //record
     void signal_recordAudio(char *buff,int len,long long tempTime);
     void signal_recordVedio(char *buff,int len,long long tempTime);
     void signal_startRecord(QString did,long long tempTime);
     void signal_endRecord();
+
 
 
 
@@ -134,6 +139,7 @@ private:
     bool isAudioFirstPlay;
     bool isFirstData;
 
+
     quint64 preAudioTime;
 
 
@@ -143,9 +149,6 @@ private:
     QString mDid;
     QString mAccount;
     QString mPassword;
-
-
-
 
 };
 
